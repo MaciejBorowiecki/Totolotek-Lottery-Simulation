@@ -1,131 +1,148 @@
-# Totolotek Lottery System Simulation
+# Totolotek Lottery System Implementation
 
-## Overview
+## Project Overview
 
-This project implements a lottery system simulating the Totolotek game. Totolotek sells tickets that allow players to participate in draws where 6 distinct numbers are selected from 0-49. Each ticket can contain multiple bets, and each bet consists of six chosen numbers. Tickets can cover more than one draw. The price for a single bet was set at 3 PLN, including a 0.60 PLN tax paid to the state. The remaining amount was available to the Totolotek central office for payouts and profit distribution. Prizes were awarded for matching three, four, five, or six numbers, corresponding to fourth, third, second, and first prize levels.
+This project implements a complete Polish lottery system called "Totolotek" that handles ticket sales, random drawings, prize calculations, and winner payouts. The system follows object-oriented principles and includes comprehensive financial tracking with proper tax handling and government subsidy management.
 
----
+## System Architecture
 
-## Central Office
+### Core Components
 
-The Totolotek central office managed its own funds and received occasional subsidies from the state. Its main responsibilities included conducting draws, calculating prize pools, and determining the amount of winnings for each prize tier (I-IV). Prize calculations considered all bets sold across all outlets and applied rollover rules: if no first-tier winners appeared in a draw, the prize pool for the next draw increased accordingly. The system recorded the results of all draws, including:
+**Central Office**
+- Manages all financial operations and drawing ceremonies
+- Conducts regular drawings of 6 distinct numbers from 1-49 range
+- Maintains prize pools with rollover mechanism for unclaimed top prizes
+- Tracks historical drawing results with complete financial transparency
+- Handles government subsidies when prize funds are insufficient
+- Unique sequential drawing numbers starting from 1
 
-- Total prize pool for each tier  
-- Number of winning bets per tier  
-- Payouts actually claimed  
+**Collection Points**
+- 10 uniquely numbered ticket sales locations
+- Support both form-based and quick-pick ticket sales
+- Validate winning tickets and process prize claims
+- Real-time financial synchronization with central office
+- Maintain database of all sold tickets for verification
 
-The central office could also display its current financial balance.
+**Ticket Management System**
+- Unique ticket identifiers with format: `ticketNumber-collectorNumber-randomMarker-checksum`
+- 9-digit random marker and checksum (sum of digits modulo 100)
+- Support for multi-bet (1-8 bets) and multi-drawing (up to 10) tickets
+- Automated price calculation (3.00 PLN per bet per drawing)
+- Secure validation system to prevent fraud and double redemption
 
----
+### Financial System
 
-## Claiming Winnings
+**Revenue Distribution**
+- 0.60 PLN tax per bet directed to government budget
+- 2.40 PLN remaining for prize pool and operational costs
+- 51% of net revenue allocated to prize fund
 
-Players could collect prizes by presenting their winning tickets at the outlet where the ticket was purchased. The system verified that the ticket was valid and that prizes had not already been claimed. Once claimed, tickets were marked as redeemed and could not be used again. Tickets that were redeemed before all covered draws were completed lost their remaining prize eligibility. High-value prizes (from 2,280 PLN per bet) were taxed at 10% during collection, while lower prizes were tax-free. In cases where a ticket included multiple prizes, only the high-value portion was taxed. If the central office lacked funds for a payout, it automatically received the missing amount as a subsidy from the state.
+**Prize Structure**
+- **Tier I** (6 numbers): 44% of prize pool, minimum 2,000,000 PLN guarantee
+- **Tier II** (5 numbers): 8% of prize pool  
+- **Tier III** (4 numbers): Residual allocation, minimum 36.00 PLN per winner
+- **Tier IV** (3 numbers): Fixed 24.00 PLN prize
 
----
+**Taxation Rules**
+- 10% tax on individual prizes ≥ 2,280 PLN
+- No tax on smaller prizes
+- Only high-value portion taxed in multi-prize tickets
+- Proper rounding down to nearest grosz in all calculations
 
-## Draws
+### Player System
 
-Each draw had a unique sequential number and stored six sorted winning numbers. Draws could be printed in a human-readable format, listing the draw number and winning numbers aligned properly. Example:
-```
-Draw #6901
-Results: 5 8 9 28 31 47
-```
+**Implemented Player Types**
 
----
+*Minimalist Players*
+- Purchase single quick-pick tickets for immediate drawings only
+- Loyal to specific collection points
+- Simple betting strategy
 
-## Prize Distribution
+*Random Players*
+- Variable ticket purchases (1-100 tickets per transaction)
+- Random betting patterns across different locations
+- Diverse initial funding levels (below 1 million PLN)
 
-51% of the total revenue (minus tax) from all bets in a draw was allocated to prizes, while the rest was retained as profit. Prize allocation rules were as follows:
+*Fixed Numbers Players*
+- Consistently bet the same 6 lucky numbers
+- Purchase tickets covering 10 consecutive drawings
+- Buy new tickets only after all previous drawings complete
+- Systematic collection point rotation among favorites
 
-- 44% to first-tier prizes (6 numbers matched)  
-- 8% to second-tier prizes (5 numbers matched)  
-- Fixed 24 PLN for fourth-tier prizes (3 numbers matched)  
-- Remaining amount to third-tier prizes (4 numbers matched)  
+*Fixed Form Players*
+- Use personalized betting form patterns
+- Regular purchase intervals at predefined cycles
+- Rotate through multiple favorite collection points
+- Maintain consistent betting strategy
 
-First-tier prize pools were guaranteed at a minimum of 2 million PLN. Prizes in tiers I-III were evenly divided among winning bets, with third-tier prizes having a minimum value of 36 PLN. Rollover was applied for first-tier prizes if no winners appeared. All calculations rounded down to the nearest grosz.
+## Key Features
 
----
+### Drawing Management
+- Sequential drawing numbers with proper formatting
+- 6 unique numbers selected from 1-49 range
+- Results displayed with right-aligned numbers for readability
+- Public access to winning numbers and prize information
+- Complete historical record maintenance
 
-## Outlets
+### Betting Slip Processing
+- Forms with 8 numbered betting fields (1-8)
+- Each field contains 49 numbered boxes plus "cancel" option
+- Automatic exclusion of invalid fields (not exactly 6 numbers)
+- Support for multi-drawing selections (1-10 drawings)
+- Intelligent form interpretation and validation
 
-Outlets sold tickets either via a filled-in blank form (manual selection) or "quick-pick" (random selection). Only one ticket could be purchased per transaction. Outlets forwarded all revenue (minus tax) to the central office immediately. Each ticket generated in an outlet included a unique identifier, total price, and the amount of tax collected.
-
----
-
-## Blank Forms
-
-Each blank form contained up to 8 bets with 49 selectable numbers per bet and an optional "cancel" mark. Bets with invalid selections were automatically ignored. The form also allowed selecting the number of draws (up to 10) the ticket would cover.
-
----
-
-## Tickets
-
-Tickets were generated by outlets and provided to players after payment. Each ticket included:
-
-- Unique identifier  
-- Numbered list of bets  
-- Number of draws covered  
-- Draw numbers  
-- Total price  
-
-Example:
-```
-TICKET #5-125-611233269-46
-1: 11 12 19 23 33 43
-2: 4 15 24 33 35 44
-NUMBER OF DRAWS: 4
-DRAW NUMBERS: 8 9 10 11
-PRICE: 24.00 PLN
-```
-
----
-
-## Players
-
-Players had a name, surname, PESEL, and a wallet with funds. They could view their information and the list of tickets they owned. Various types of players were implemented:
-
-- **Minimalist**: always bought one quick-pick ticket in their preferred outlet for the next draw.  
-- **Random**: bought a random number of quick-pick tickets in a randomly chosen outlet.  
-- **Fixed-number**: always played their favorite 6 numbers for up to 10 upcoming draws.  
-- **Fixed-form**: used a personal blank form to buy tickets regularly.  
-
-Players could have multiple preferred outlets and rotated purchases among them. The system was designed to easily add other player types.
-
----
-
-## State Budget
-
-The system tracked tax payments and subsidies. It could report the total taxes collected and total subsidies received.
-
----
+### Ticket Validation & Security
+- Checksum verification for ticket authenticity
+- Collection point origin validation
+- Prevention of duplicate prize claims
+- Automatic voiding of partially used tickets
+- Secure identifier generation with random markers
 
 ## Implementation Details
 
-- The system was implemented entirely in Java using OOP principles.  
-- Financial calculations used integer types (`long`) to avoid floating-point errors.  
-- Standard Java collections were used extensively (ArrayList, HashMap, TreeSet, etc.).  
-- Proper `equals` and `hashCode` methods were implemented for objects stored in collections.  
+### Financial Integrity
+- Uses long/BigInteger for all monetary calculations
+- Avoids floating-point precision issues
+- Proper grosz-level rounding throughout system
+- Comprehensive audit trails for all transactions
+- Automatic subsidy handling when funds insufficient
 
----
+### Object-Oriented Design
+- Proper encapsulation and separation of concerns
+- Extensible player type system with easy addition of new types
+- Flexible betting slip and ticket hierarchy
+- Collection-based data management with proper equals/hashCode implementations
+- Interface-driven design for easy testing and extension
 
-## Demonstration
+### Government Budget Integration
+- Tracks total tax collections from ticket sales and high-value prizes
+- Provides automatic subsidies when central office lacks prize funds
+- Maintains separate accounting for tax revenue and subsidy payments
+- Assumed to have unlimited resources for system stability
 
-The main program demonstrated the system by:
+## Operational Results
 
-1. Creating the central office and 10 outlets.  
-2. Creating 200 players of each type and distributing them across outlets.  
-3. Conducting 20 draws, with players purchasing tickets before each draw.  
-4. Allowing players to claim winnings as draws were completed.  
-5. Printing complete draw results, central office balance, total taxes collected, and subsidies received.  
+The system successfully conducted 20 complete drawing cycles with:
+- Full participation from 200 players of each type
+- Automated ticket purchasing before each drawing
+- Immediate prize claiming for completed tickets
+- Comprehensive financial tracking and reporting
 
----
+### Final Output Capabilities
+- Complete drawing history with financial breakdowns
+- Total government tax revenue tracking
+- Government subsidy utilization reporting
+- Individual collection point performance metrics
+- Central office financial status reporting
 
-## Testing
+## Technical Implementation
 
-JUnit tests were implemented to cover:
+### Testing Coverage
+- JUnit tests for betting slip validation and error detection
+- Ticket generation and identifier verification
+- Prize calculation algorithms with various scenarios
+- Financial transaction verification and tax calculations
+- Edge case handling for all player types
+- Rollover mechanism and subsidy testing
 
-- Blank forms and ticket generation  
-- Prize calculation logic  
-- Ticket sales and financial updates  
-- Correct application of taxes and subsidies  
+The implementation demonstrates robust handling of complex lottery operations while maintaining financial accuracy and system integrity across all components, providing a solid foundation for real-world lottery management.
